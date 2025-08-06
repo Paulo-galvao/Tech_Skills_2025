@@ -59,8 +59,29 @@ function show(user:AdminUser):object {
     return user;
 }
 
-console.log(showUser(admUser));
-console.log('');
-console.log(showProduct(produto));
-console.log('');
-console.log(show(admUser));
+function getData<T>(items: T[]):T[] {
+    return items;
+}
+
+function getById<T extends { id: number }>(items: T[], id: number): T | undefined {
+    
+    return items.find(item => item.id === id);
+}
+
+let items:number[] = [1, 2, 3];
+let items_b:string[] = ['a', 'b', 'c', 'd', 'e'];
+
+let users:User[] = [usuario, admUser];
+let products:Product[] = [produto];
+
+// console.log(getData(items));
+// console.log(getData(items_b));
+// console.log(getData(items_c));
+console.log(getById(users, 1));
+
+
+// console.log(showUser(admUser));
+// console.log('');
+// console.log(showProduct(produto));
+// console.log('');
+// console.log(show(admUser));
