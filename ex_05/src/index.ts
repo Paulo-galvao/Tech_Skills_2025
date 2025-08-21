@@ -1,8 +1,12 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express, NextFunction, Request, Response } from 'express';
+import { logging } from './middlewares/logging';
+import { errorHandler } from './middlewares/errorHandler';
+import { AppError } from './errors/AppError';
 
 const app: Express = express();
 const port: number = 3000;
 app.use(express.json());
+app.use(logging);
 
 interface Iuser {
     id: number,
@@ -38,11 +42,15 @@ app.get('/users/:id', (req: Request<{id:number}>, res: Response):Response => {
     }
 });
 
-app.post('/users', (req: Request, res: Response):Response  => {
+app.post('/users', (req: Request, res: Response, next:NextFunction)  => {
     
     try {
         
         let {id, name, email, isActive} = req.body;
+
+        if(!id || !name || !email || !isActive) {
+            return next(new AppError("Algum campo não foi preenchido", 400));
+        }
 
         if(
             typeof id !== "number" ||
@@ -50,10 +58,10 @@ app.post('/users', (req: Request, res: Response):Response  => {
             typeof email !== "string" ||
             typeof isActive !== "boolean" 
         ) {
-            return res.status(400).send({
-                message: "Tipos incorretos"
-            });
-        }
+            return next(new AppError("Tipos incorretos", 400));
+                 
+            }
+        
 
         let user:Iuser = {
             id,
@@ -63,8 +71,6 @@ app.post('/users', (req: Request, res: Response):Response  => {
         }
 
         users.push(user);
-
-        
 
         return res.status(201).send({
             message: 'Usuário cadastrado',
@@ -77,10 +83,16 @@ app.post('/users', (req: Request, res: Response):Response  => {
     }
 });
 
-app.put('/users/:id', (req: Request<{id:number}>, res: Response):Response => {
+app.put('/users/:id', (req: Request<{id:number}>, res: Response, next:NextFunction):Response | void => {
     try {
         let {id} = req.params;
         let {userId, name, email, isActive} = req.body;
+
+        
+
+        if(!userId || !name || !email || !isActive) {
+            return next(new AppError("Algum campo não foi preenchido", 400));
+        }
 
         if(
             typeof id !== "number" ||
@@ -96,7 +108,7 @@ app.put('/users/:id', (req: Request<{id:number}>, res: Response):Response => {
         const indexUser: number = users.findIndex(user => user.id === Number(id));
 
         if(indexUser === -1) {
-            return res.status(400).send({
+            return res.status(404).send({
                 message: "Usuário não encontrado"
             });
         }
@@ -127,7 +139,7 @@ app.delete('/users/:id', (req: Request<{id:number}>, res: Response):Response => 
         const indexUser: number = users.findIndex(user => user.id === Number(id));
 
         if(indexUser === -1) {
-            return res.status(400).send({
+            return res.status(404).send({
                 message: "Usuário não encontrado"
             });
         }
@@ -143,6 +155,9 @@ app.delete('/users/:id', (req: Request<{id:number}>, res: Response):Response => 
         
     }
 });
+
+app.use(errorHandler);
+
 
 app.listen(port, () => {
     console.log(`Server ruuning at port ${port}`);
