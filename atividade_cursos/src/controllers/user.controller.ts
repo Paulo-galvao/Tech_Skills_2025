@@ -28,7 +28,7 @@ export async function register(req: Request, res: Response, next:NextFunction):P
 
         const user = await User.create(req.body);
 
-        generateToken(user.user_id);
+        // generateToken(user.user_id);
         
         return res.status(201).send({
             message: "Cadastro concluído com sucesso"
