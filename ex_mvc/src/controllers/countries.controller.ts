@@ -1,4 +1,4 @@
-import express, {NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import axios, { AxiosResponse} from 'axios';
 
 import Country from '../models/Country';
